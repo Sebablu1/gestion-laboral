@@ -1,0 +1,271 @@
+/* ============================================
+   CUSTOM DESIGN - REDISEÑO PROFESIONAL
+   No modifica el CSS original, solo agrega estilos nuevos
+   ============================================ */
+
+/* Variables para el rediseño */
+:root {
+    --primary-pro: #0f172a;
+    --secondary-pro: #1e293b;
+    --accent-pro: #3b82f6;
+    --accent-hover: #2563eb;
+    --success-pro: #10b981;
+    --danger-pro: #ef4444;
+    --warning-pro: #f59e0b;
+    --text-pro: #334155;
+    --text-light: #64748b;
+    --bg-pro: #f8fafc;
+    --card-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.01);
+    --card-shadow-hover: 0 25px 30px -12px rgba(0,0,0,0.15);
+    --transition-pro: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== MODIFICACIONES SUAVES (overrides seguros) ===== */
+
+/* Cards más modernas */
+.card {
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: var(--transition-pro);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+/* Botones más redondeados */
+.btn, .tab, .sub-tab {
+    border-radius: 9999px;
+}
+
+/* Inputs más modernos */
+input, select, textarea {
+    border-radius: 9999px;
+    padding: 12px 18px;
+    background-color: white;
+}
+
+/* ===== NUEVAS CLASES (seguras) ===== */
+
+/* Badges modernos */
+.badge-pro {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-info {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+/* Avatar para empleados */
+.avatar-pro {
+    width: 40px;
+    height: 40px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, var(--accent-pro), var(--primary-pro));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+/* Tabla más moderna */
+.table-pro {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.table-pro th {
+    background: var(--bg-pro);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+}
+
+/* Cards de estadísticas rediseñadas */
+.stat-card-pro {
+    background: linear-gradient(135deg, white, #f8fafc);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: var(--transition-pro);
+}
+
+.stat-card-pro:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+.stat-number-pro {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary-pro), var(--accent-pro));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+/* Grid mejorado */
+.grid-pro {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-pro {
+    animation: fadeInUp 0.4s ease-out;
+}
+
+/* Skeleton loading */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 8px;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Tooltip moderno */
+.tooltip-pro {
+    position: relative;
+    cursor: help;
+}
+
+.tooltip-pro:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary-pro);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    z-index: 100;
+}
+
+/* ===== DARK MODE MEJORADO ===== */
+body.dark-mode .badge-success {
+    background: #064e3b;
+    color: #a7f3d0;
+}
+
+body.dark-mode .badge-warning {
+    background: #78350f;
+    color: #fde68a;
+}
+
+body.dark-mode .badge-danger {
+    background: #7f1d1d;
+    color: #fecaca;
+}
+
+body.dark-mode .badge-info {
+    background: #1e3a5f;
+    color: #bae6fd;
+}
+
+body.dark-mode .stat-card-pro {
+    background: linear-gradient(135deg, var(--secondary-pro), var(--primary-pro));
+    border-color: rgba(255,255,255,0.05);
+}
+
+body.dark-mode .stat-number-pro {
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+/* ===== RESPONSIVE MEJORADO ===== */
+@media (max-width: 768px) {
+    .grid-pro {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .stat-number-pro {
+        font-size: 1.75rem;
+    }
+    
+    .badge-pro {
+        font-size: 0.65rem;
+        padding: 2px 8px;
+    }
+}
+
+/* ===== EFECTOS ESPECIALES ===== */
+
+/* Glassmorphism para modales */
+.modal-glass {
+    backdrop-filter: blur(8px);
+    background: rgba(0,0,0,0.3);
+}
+
+/* Hover en filas de tabla */
+.table-row-hover:hover {
+    background: var(--bg-pro);
+    transition: var(--transition-pro);
+}
+
+body.dark-mode .table-row-hover:hover {
+    background: var(--secondary-pro);
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-pro);
+    border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-pro);
+    border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-hover);
+}
