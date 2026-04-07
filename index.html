@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión Laboral - Uruguay</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+    <div id="notificationContainer"></div>
+    <div id="globalSpinner" class="spinner-overlay" style="display: none;">
+        <div class="spinner-large"></div>
+    </div>
+
+    <!-- Login Panel -->
+    <div id="loginPanel" class="login-panel">
+        <div class="login-card">
+            <h2>🏢 Sistema Laboral Uruguay</h2>
+            <form id="formLogin">
+                <div class="form-group">
+                    <label>👤 Usuario / Email</label>
+                    <input type="text" id="loginUsuario" placeholder="admin" required>
+                </div>
+                <div class="form-group">
+                    <label>🔒 Contraseña</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%">Ingresar</button>
+            </form>
+            <p class="login-demo">Demo: admin / admin</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="hidden">
+        <div class="container">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-left">
+                    <div id="empresaLogo" class="empresa-logo">🏢</div>
+                    <div>
+                        <h1 id="empresaNombre">Mi Empresa S.A.</h1>
+                        <small id="empresaRut">99.999.999-9</small>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button id="btnModoOscuro" class="btn-icon">🌙</button>
+                    <div class="notifications-container">
+                        <button id="btnNotificaciones" class="btn-icon btn-notifications">
+                            🔔
+                            <span id="badgeNotificaciones" class="notification-badge">0</span>
+                        </button>
+                        <div id="panelNotificaciones" class="notifications-panel hidden">
+                            <div class="panel-header">
+                                <span>🔔 Notificaciones</span>
+                                <button id="btnMarcarTodasLeidas" class="btn-text">✅ Marcar todas</button>
+                            </div>
+                            <div id="listaNotificaciones"></div>
+                        </div>
+                    </div>
+                    <div id="userInfoHeader"></div>
+                </div>
+            </div>
+
+            <!-- Tabs principales -->
+            <div id="tabsContainer" class="tabs"></div>
+
+            <!-- Dashboard Panel -->
+            <div id="dashboardPanel" class="tab-content">
+                <div class="stat-cards" id="dashboardStats"></div>
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h2>📊 Empleados por Área</h2>
+                        <canvas id="horasPorAreaChart" width="400" height="200"></canvas>
+                    </div>
+                    <div class="card">
+                        <h2>⚠️ Últimas Ausencias</h2>
+                        <div id="ultimasAusencias"></div>
+                    </div>
+                    <div class="card">
+                        <h2>🏖️ Próximas Licencias</h2>
+                        <div id="proximasLicencias"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Panel con Sub-tabs -->
+            <div id="adminPanel" class="tab-content">
+                <div class="sub-tabs">
+                    <div class="sub-tab active" data-subtab="empresa">🏢 Empresa</div>
+                    <div class="sub-tab" data-subtab="config">⚙️ Config</div>
+                    <div class="sub-tab" data-subtab="areas">🏷️ Áreas</div>
+                    <div class="sub-tab" data-subtab="puestos">💼 Puestos</div>
+                    <div class="sub-tab" data-subtab="usuarios">👥 Usuarios</div>
+                    <div class="sub-tab" data-subtab="ausencias">⚠️ Ausencias</div>
+                    <div class="sub-tab" data-subtab="licencias">🏖️ Licencias</div>
+                    <div class="sub-tab" data-subtab="finanzas">💰 Finanzas</div>
+                    <div class="sub-tab" data-subtab="sistema">🔧 Sistema</div>
+                </div>
+
+                <div id="subtab-empresa" class="subtab-content active">
+                    <div class="card">
+                        <h2>🏢 DATOS DE LA EMPRESA</h2>
+                        <div class="form-grid">
+                            <input type="text" id="empresaNombreInput" placeholder="Nombre">
+                            <input type="text" id="empresaRutInput" placeholder="RUT">
+                            <input type="text" id="empresaDirInput" placeholder="Dirección">
+                            <input type="text" id="empresaLogoInput" placeholder="Logo (emoji)">
+                        </div>
+                        <button id="btnGuardarEmpresa" class="btn btn-primary">💾 Guardar</button>
+                    </div>
+                </div>
+
+                <div id="subtab-config" class="subtab-content">
+                    <div class="card">
+                        <h2>⚙️ CONFIGURACIÓN</h2>
+                        <div class="form-grid">
+                            <div class="form-group"><label>EXTRA (%)</label><input type="number" id="extraPorcentaje" value="50"></div>
+                            <div class="form-group"><label>BPS (%)</label><input type="number" id="bpsPorcentaje" value="15"></div>
+                            <div class="form-group"><label>FONASA (%)</label><input type="number" id="fonasaPorcentaje" value="4.5"></div>
+                            <div class="form-group"><label>IRPF (%)</label><input type="number" id="irpfPorcentaje" value="0"></div>
+                            <div class="form-group"><label>JORNADA (hs)</label><input type="number" id="jornadaDiaria" value="8"></div>
+                        </div>
+                        <button id="btnGuardarConfig" class="btn btn-primary">💾 Guardar</button>
+                    </div>
+                </div>
+
+                <div id="subtab-areas" class="subtab-content">
+                    <div class="card">
+                        <h2>🏷️ ÁREAS</h2>
+                        <div class="form-grid">
+                            <input type="text" id="nuevaAreaNombre" placeholder="Nueva área">
+                            <button id="btnAgregarArea" class="btn btn-primary">➕ Agregar</button>
+                        </div>
+                        <div id="listaAreas"></div>
+                    </div>
+                </div>
+
+                <div id="subtab-puestos" class="subtab-content">
+                    <div class="card">
+                        <h2>💼 PUESTOS</h2>
+                        <div class="form-grid">
+                            <input type="text" id="nuevoPuestoNombre" placeholder="Nombre">
+                            <select id="nuevoPuestoArea">
+                                <option value="">Seleccionar área</option>
+                            </select>
+                            <input type="number" id="nuevoPuestoSueldo" placeholder="Sueldo mensual">
+                            <input type="number" id="nuevoPuestoHoras" placeholder="Horas mensuales" value="44">
+                            <button id="btnAgregarPuesto" class="btn btn-primary">➕ Agregar</button>
+                        </div>
+                        <div id="listaPuestos"></div>
+                    </div>
+                </div>
+
+                <div id="subtab-usuarios" class="subtab-content">
+                    <div class="card">
+                        <h2>👥 USUARIOS</h2>
+                        <div class="form-grid">
+                            <input type="text" id="nuevoUserNombre" placeholder="Nombre *">
+                            <input type="email" id="nuevoUserEmail" placeholder="Email (opcional)">
+                            <input type="password" id="nuevoUserPass" placeholder="Contraseña *">
+                            <input type="date" id="nuevoUserFechaIngreso" placeholder="Fecha ingreso *">
+                            <select id="nuevoUserPuesto">
+                                <option value="">Seleccionar puesto</option>
+                            </select>
+                            <button id="btnCrearUsuario" class="btn btn-primary">➕ Crear</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Usuario</th>
+                                        <th>Email</th>
+                                        <th>Puesto</th>
+                                        <th>Área</th>
+                                        <th>Sueldo</th>
+                                        <th>Ingreso</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaUsuarios"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="subtab-ausencias" class="subtab-content">
+                    <div class="card">
+                        <h2>⚠️ AUSENCIAS</h2>
+                        <div class="form-grid">
+                            <select id="ausenciaEmpleado">
+                                <option value="">Seleccionar empleado</option>
+                            </select>
+                            <input type="date" id="ausenciaFecha">
+                            <select id="ausenciaTipo">
+                                <option value="falta">❌ Falta</option>
+                                <option value="atraso">⏰ Atraso</option>
+                                <option value="permiso">✅ Permiso</option>
+                            </select>
+                            <input type="number" id="ausenciaHoras" placeholder="Horas" value="8">
+                            <input type="text" id="ausenciaMotivo" placeholder="Motivo">
+                            <button id="btnRegistrarAusencia" class="btn btn-primary">📝 Registrar</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Empleado</th>
+                                        <th>Fecha</th>
+                                        <th>Tipo</th>
+                                        <th>Horas</th>
+                                        <th>Motivo</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaAusencias"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="subtab-licencias" class="subtab-content">
+                    <div class="card">
+                        <h2>🏖️ LICENCIAS</h2>
+                        <div class="form-grid">
+                            <select id="licenciaEmpleado">
+                                <option value="">Seleccionar empleado</option>
+                            </select>
+                            <input type="month" id="licenciaMes">
+                            <input type="number" id="licenciaDias" placeholder="Días">
+                            <button id="btnSolicitarLicencia" class="btn btn-primary">📝 Solicitar</button>
+                        </div>
+                        <div id="listaLicencias"></div>
+                    </div>
+                </div>
+
+                <div id="subtab-finanzas" class="subtab-content">
+                    <div class="card">
+                        <h2>📉 RETENCIONES</h2>
+                        <div class="form-grid">
+                            <input type="text" id="nuevaDedNombre" placeholder="Concepto">
+                            <input type="text" id="nuevaDedValor" placeholder="Valor (5000 o 10%)">
+                            <select id="nuevaDedTipo">
+                                <option value="fijo">💰 Monto fijo</option>
+                                <option value="porcentaje">📊 Porcentaje</option>
+                            </select>
+                            <button id="btnAgregarDed" class="btn btn-primary">➕ Agregar</button>
+                        </div>
+                        <div id="listaDeducciones"></div>
+                    </div>
+
+                    <div class="card">
+                        <h2>🎁 ADICIONALES POR EMPLEADO</h2>
+                        <div class="form-grid">
+                            <select id="adicionalEmpleado">
+                                <option value="">Seleccionar empleado</option>
+                            </select>
+                            <input type="text" id="nuevoAdicionalNombre" placeholder="Concepto">
+                            <input type="text" id="nuevoAdicionalValor" placeholder="Valor">
+                            <select id="nuevoAdicionalTipo">
+                                <option value="fijo">💰 Monto fijo</option>
+                                <option value="porcentaje">📊 Porcentaje</option>
+                            </select>
+                            <button id="btnAgregarAdicional" class="btn btn-primary">🎁 Agregar</button>
+                        </div>
+                        <div id="listaAdicionales"></div>
+                    </div>
+
+                    <div class="card">
+                        <h2>💰 GENERAR LIQUIDACIÓN</h2>
+                        <div class="form-grid">
+                            <select id="adminSelectEmpleado">
+                                <option value="">Seleccionar empleado</option>
+                            </select>
+                            <input type="date" id="adminFechaInicio">
+                            <input type="date" id="adminFechaFin">
+                            <button id="btnGenerarRecibo" class="btn btn-primary">💰 Generar recibo</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2>📋 RECIBOS <button id="btnEliminarTodosRecibos" class="btn-delete">🗑️ Todos</button></h2>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Empleado</th>
+                                        <th>Período</th>
+                                        <th>Fecha</th>
+                                        <th>Neto</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaRecibos"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="subtab-sistema" class="subtab-content">
+                    <div class="card">
+                        <h2>📅 CIERRE DE MES</h2>
+                        <div class="form-grid">
+                            <input type="month" id="mesCierre">
+                            <button id="btnCerrarMes" class="btn btn-warning">🔒 Cerrar mes</button>
+                        </div>
+                        <div id="mesesCerradosList"></div>
+                    </div>
+
+                    <div class="card">
+                        <h2>✏️ SOLICITUDES PENDIENTES</h2>
+                        <div id="listaEdicionesPendientes"></div>
+                    </div>
+
+                    <div class="card">
+                        <h2>🔐 CAMBIAR CONTRASEÑA</h2>
+                        <div class="form-grid">
+                            <input type="password" id="adminPassActual" placeholder="Contraseña actual">
+                            <input type="password" id="adminPassNueva" placeholder="Nueva contraseña">
+                            <input type="password" id="adminPassConfirm" placeholder="Confirmar">
+                            <button id="btnCambiarPassAdmin" class="btn btn-primary">🔒 Cambiar</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2>📋 AUDITORÍA</h2>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Usuario</th>
+                                        <th>Acción</th>
+                                        <th>Detalle</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaAuditoria"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empleado Panel -->
+            <div id="empleadoPanel" class="tab-content">
+                <div class="card">
+                    <h2>⏱️ MI JORNADA</h2>
+                    <div id="estadoFichaje"></div>
+                    <div class="form-grid">
+                        <button id="btnEntrada" class="btn btn-primary">🟢 Marcar entrada</button>
+                        <button id="btnSalida" class="btn btn-warning">🔴 Marcar salida</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>📅 CORREGIR REGISTRO</h2>
+                    <div class="form-grid">
+                        <input type="date" id="fechaCorreccion">
+                        <input type="time" id="nuevaEntrada" placeholder="Entrada">
+                        <input type="time" id="nuevaSalida" placeholder="Salida">
+                        <input type="text" id="motivoCorreccion" placeholder="Motivo">
+                        <button id="btnCorregirRegistro" class="btn btn-primary">✏️ Solicitar</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>📋 MIS REGISTROS</h2>
+                    <div class="form-grid">
+                        <input type="month" id="filtroMesEmpleado">
+                        <button id="btnFiltrarRegistros" class="btn btn-primary">🔍 Filtrar</button>
+                    </div>
+                    <div id="resumenHorasEmpleado"></div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Entrada</th>
+                                    <th>Salida</th>
+                                    <th>Horas</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaRegistros"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>📄 MIS RECIBOS</h2>
+                    <div class="form-grid">
+                        <input type="date" id="empleadoFechaInicio">
+                        <input type="date" id="empleadoFechaFin">
+                        <button id="btnGenerarMiRecibo" class="btn btn-primary">💰 Generar</button>
+                    </div>
+                    <div id="empleadoReciboContainer"></div>
+                </div>
+
+                <div class="card">
+                    <h2>🔐 CAMBIAR CONTRASEÑA</h2>
+                    <div class="form-grid">
+                        <input type="password" id="empPassActual" placeholder="Actual">
+                        <input type="password" id="empPassNueva" placeholder="Nueva">
+                        <input type="password" id="empPassConfirm" placeholder="Confirmar">
+                        <button id="btnCambiarPass" class="btn btn-primary">🔒 Cambiar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts modulares -->
+    <script src="js/config.js"></script>
+    <script src="js/utils/helpers.js"></script>
+    <script src="js/utils/storage.js"></script>
+    <script src="js/utils/ui.js"></script>
+    
+    <script src="js/modules/auth.js"></script>
+    <script src="js/modules/dashboard.js"></script>
+    
+    <script src="js/modules/admin/areas.js"></script>
+    <script src="js/modules/admin/puestos.js"></script>
+    <script src="js/modules/admin/usuarios.js"></script>
+    <script src="js/modules/admin/ausencias.js"></script>
+    <script src="js/modules/admin/licencias.js"></script>
+    <script src="js/modules/admin/deducciones.js"></script>
+    <script src="js/modules/admin/adicionales.js"></script>
+    <script src="js/modules/admin/recibos.js"></script>
+    <script src="js/modules/admin/meses.js"></script>
+    <script src="js/modules/admin/auditoria.js"></script>
+    
+    <script src="js/modules/empleado/jornada.js"></script>
+    <script src="js/modules/empleado/registros.js"></script>
+    <script src="js/modules/empleado/recibos.js"></script>
+    
+    <script src="js/app.js"></script>
+</body>
+</html>
