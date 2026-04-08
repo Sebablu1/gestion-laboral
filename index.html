@@ -2,12 +2,160 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestión Laboral - Uruguay</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Sistema de Gestión Laboral - Uruguay | HRMS Profesional</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="custom.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================ */
+        /* MEJORAS VISUALES (NO INTERFIEREN CON TU CSS) */
+        /* ============================================ */
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        .card {
+            transition: transform 0.25s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.12);
+        }
+
+        [data-tooltip] {
+            position: relative;
+            cursor: help;
+        }
+        [data-tooltip]::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        [data-tooltip]:hover::before {
+            opacity: 1;
+        }
+
+        .badge-soft {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        body.dark-mode .badge-soft {
+            background: #334155;
+            color: #e2e8f0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        body.dark-mode ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        body.dark-mode ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+
+        .btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .empresa-logo {
+            transition: transform 0.2s ease, filter 0.2s ease;
+        }
+        .empresa-logo:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .data-table tr:hover td {
+            background: #f8fafc;
+        }
+        body.dark-mode .data-table tr:hover td {
+            background: #1e293b;
+        }
+
+        .notification-item {
+            transition: all 0.2s ease;
+        }
+        .notification-item.unread {
+            background: #ecfdf5;
+            border-left: 3px solid #059669;
+        }
+        body.dark-mode .notification-item.unread {
+            background: #064e3b;
+        }
+
+        @keyframes pulseBadge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        .notification-badge:not(:empty) {
+            animation: pulseBadge 0.4s ease;
+        }
+
+        .stat-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #059669, #10b981, #34d399);
+        }
+
+        input, select, textarea {
+            transition: all 0.2s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #059669;
+            box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1);
+        }
+    </style>
 </head>
 <body>
     <div id="notificationContainer"></div>
@@ -18,17 +166,23 @@
     <!-- Login Panel -->
     <div id="loginPanel" class="login-panel">
         <div class="login-card">
-            <h2>🏢 Sistema Laboral Uruguay</h2>
+            <div style="text-align: center; margin-bottom: 16px;">
+                <div style="font-size: 56px; margin-bottom: 8px;">🏢</div>
+                <h2 style="margin-bottom: 4px;">Gestión Laboral Uruguay</h2>
+                <p style="color: #64748b; font-size: 0.85rem;">Control y eficiencia</p>
+            </div>
             <form id="formLogin">
                 <div class="form-group">
                     <label>👤 Usuario / Email</label>
-                    <input type="text" id="loginUsuario" placeholder="admin" required>
+                    <input type="text" id="loginUsuario" placeholder="admin" autocomplete="off" required>
                 </div>
                 <div class="form-group">
                     <label>🔒 Contraseña</label>
-                    <input type="password" id="loginPassword" required>
+                    <input type="password" id="loginPassword" placeholder="••••••" required>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width:100%">Ingresar</button>
+                <button type="submit" class="btn btn-primary" style="width:100%">
+                    <span>🚀 Ingresar</span>
+                </button>
             </form>
             <p class="login-demo">Demo: admin / admin</p>
         </div>
@@ -42,14 +196,14 @@
                 <div class="header-left">
                     <div id="empresaLogo" class="empresa-logo">🏢</div>
                     <div>
-                        <h1 id="empresaNombre">Mi Empresa S.A.</h1>
-                        <small id="empresaRut">99.999.999-9</small>
+                        <h1 id="empresaNombre" style="font-size: 1.5rem; margin-bottom: 4px;">Mi Empresa S.A.</h1>
+                        <small id="empresaRut" style="opacity: 0.85;">99.999.999-9</small>
                     </div>
                 </div>
                 <div class="header-right">
-                    <button id="btnModoOscuro" class="btn-icon">🌙</button>
+                    <button id="btnModoOscuro" class="btn-icon" data-tooltip="Modo oscuro">🌙</button>
                     <div class="notifications-container">
-                        <button id="btnNotificaciones" class="btn-icon btn-notifications">
+                        <button id="btnNotificaciones" class="btn-icon btn-notifications" data-tooltip="Notificaciones">
                             🔔
                             <span id="badgeNotificaciones" class="notification-badge">0</span>
                         </button>
